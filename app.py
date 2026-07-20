@@ -2,7 +2,21 @@ import streamlit as st
 import os
 from dotenv import load_dotenv
 import pandas as pd
+from datetime import datetime
 import mysql.connector
+
+
+hora_atual = datetime.now().hour
+nome_usuario = os.getenv("USERNAME")
+
+if hora_atual < 12:
+    saudacao = ("Bom dia,")
+elif hora_atual < 18:
+    saudacao = ("Boa tarde,")
+else:
+    saudacao = ("Boa noite,")
+
+st.write(saudacao, nome_usuario)
 
 st.title("MedQuery")
 st.write("MedQuery")
@@ -26,21 +40,22 @@ elif escolha == "Médico com mais Consultas":
 elif escolha == "Media de idade dos Pacientes":
     query = "select avg(idade) from pacientes"
 
-conexao = mysql.connector.connect(
-    host = os.getenv("DB_HOST"),
-    user = os.getenv("DB_USER"),
-    password = os.getenv("DB_PASSWORD"),
-    database = os.getenv("DB_NAME")
-)
+if st.button("Consultar"):
+    conexao = mysql.connector.connect(
+     host = os.getenv("DB_HOST"),
+     user = os.getenv("DB_USER"),
+     password = os.getenv("DB_PASSWORD"),
+     database = os.getenv("DB_NAME")
+    )
 
-auracursor = conexao.cursor()
-auracursor.execute(query)
+    auracursor = conexao.cursor()
+    auracursor.execute(query)
 
-resultado = auracursor.fetchall()
+    resultado = auracursor.fetchall()
 
-df = pd.DataFrame(resultado, columns = auracursor.column_names)
+    df = pd.DataFrame(resultado, columns = auracursor.column_names)
 
-print(df)
+    st.dataframe(df)
 
-auracursor.close()
-conexao.close()
+    auracursor.close()
+    conexao.close()
