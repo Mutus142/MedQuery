@@ -13,12 +13,8 @@ conexao = mysql.connector.connect(
 )
 
 auracursor = conexao.cursor()
-auracursor.execute("select * from pacientes where city = 'Caxias do Sul'")
 
-resultado = auracursor.fetchall()
-df = pd.DataFrame(resultado, columns = ['id_paciente','first_name','last_name','id_medico','id_setor','dt_entrada','idade','city'])
-
-print(df)
+# aqui é onde a pergunta do usuário e a IA vão entrar
 
 auracursor.close()
 conexao.close()
