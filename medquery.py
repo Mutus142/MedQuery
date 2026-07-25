@@ -17,8 +17,13 @@ auracursor = conexao.cursor()
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-pergunta = input("O que você quer consultar? ")
-prompt = f"""
+while True:
+    pergunta = input("O que você quer consultar? (ou digite 'sair' para encerrar) ")
+
+    if pergunta.lower() == "sair":
+        break
+
+    prompt = f"""
 Você é um assistente que converte perguntas em português para comandos SQL, usado em um banco de dados hospitalar MySQL.
 
 Schema do banco:
@@ -34,13 +39,21 @@ Regras:
 
 Pergunta do usuário: {pergunta}
 """
-resposta = client.models.generate_content(
-    model="gemini-3.6-flash",
-    contents=prompt
-)
+    resposta = client.models.generate_content(
+        model="gemini-3.6-flash",
+        contents=prompt
+    )
 
-query_gerada = resposta.text.strip()
-print("SQl gerada pela IA", query_gerada)
+    query_gerada = resposta.text.strip()
+    print("SQL gerado pela IA:", query_gerada)
+
+    if query_gerada.upper().startswith("SELECT") or query_gerada.upper().startswith("WITH"):
+        auracursor.execute(query_gerada)
+        resultado = auracursor.fetchall()
+        df = pd.DataFrame(resultado, columns=auracursor.column_names)
+        print(df)
+    else:
+        print("Comando não permitido. Só é possível fazer consultas (SELECT).")
 
 auracursor.close()
 conexao.close()
